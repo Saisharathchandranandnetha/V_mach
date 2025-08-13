@@ -1,35 +1,31 @@
-# V_mach
+# Discover - Daily Tech News
 
+A pixel-accurate, dark-themed, card-based news app built with React + Vite + Tailwind.
 
+## Quickstart
 
-# AI-Powered Account & Profit Tracker
+1. Install Node.js LTS (18+). On Windows, download from https://nodejs.org or via winget:
+   ```powershell
+   winget install --id OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements
+   ```
+2. Create `.env.local` in the project root with your NewsAPI key:
+   ```env
+   VITE_NEWS_API_KEY=YOUR_KEY_HERE
+   ```
+3. Install and run:
+   ```bash
+   npm install
+   npm run dev
+   ```
 
+## Features
+- Tabs: Tech & Science, Finance, Arts & Culture (active tab styled in blue)
+- Rounded image cards, bold white headlines, light gray 2-line descriptions (truncated)
+- Author avatar + name, bookmark + headphones icons
+- Smooth hover animations, fully responsive
+- Open article in a new tab on card click
+- Bottom nav with search input and 4 icons
+- Optional text-to-speech using the browser SpeechSynthesis API
 
-![Screenshot 2025-05-20 025653](https://github.com/user-attachments/assets/a30e1e4e-5abd-473d-b15f-5a9212b454d3)
-
-A personal automation system that tracks all my financial accounts, calculates profits, and provides intelligent insights using n8n workflows and Lovable AI.
-
-## Key Features
-
-- **Automatic Account Synchronization**: Pulls data from multiple sources
-- **Profit Calculation Engine**: Computes daily/weekly/monthly gains
-- **AI Analysis**: Lovable provides spending patterns and recommendations
-- **Custom Reporting**: Generates personalized financial summaries
-
-## How It Works
-
-1. **Data Collection**: n8n workflows gather data from:
-   - Bank APIs
-   - Investment accounts
-   - Manual entry endpoints
-
-2. **Processing**:
-   - Calculates profits/losses
-   - Categorizes transactions
-   - Flags unusual activity
-
-3. **AI Enhancement**:
-   - Lovable analyzes trends
-   - Generates natural language insights
-   - Answers financial questions
-
+## Deploy (Render)
+A `render.yaml` is included. Create a new Web Service on Render and set `VITE_NEWS_API_KEY` in environment variables. Build command: `npm install && npm run build`. Publish directory: `dist`.
