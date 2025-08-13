@@ -1,47 +1,84 @@
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
 const BASE_URL = 'https://newsapi.org/v2';
 
-// Multiple CORS proxy options for reliability
-const CORS_PROXIES = [
-	'https://api.allorigins.win/raw?url=',
-	'https://corsproxy.io/?',
-	'https://thingproxy.freeboard.io/fetch/'
-];
-
 const TAB_TO_CATEGORY = {
 	tech: 'technology',
 	finance: 'business',
 	arts: 'general',
 };
 
-async function tryFetchWithProxy(url, proxyIndex = 0) {
-	if (proxyIndex >= CORS_PROXIES.length) {
-		throw new Error('All CORS proxies failed');
-	}
-	
-	const proxy = CORS_PROXIES[proxyIndex];
-	const proxyUrl = proxy + encodeURIComponent(url);
-	
-	console.log(`Trying proxy ${proxyIndex + 1}: ${proxyUrl}`);
-	
-	try {
-		const res = await fetch(proxyUrl, {
-			headers: {
-				'X-Api-Key': API_KEY,
-			},
-		});
-		
-		if (!res.ok) {
-			throw new Error(`Proxy ${proxyIndex + 1} failed: ${res.status}`);
+// Sample news data as fallback
+const SAMPLE_NEWS = {
+	tech: [
+		{
+			title: 'AI Breakthrough: New Language Model Shows Remarkable Capabilities',
+			description: 'Researchers have developed a new artificial intelligence model that demonstrates unprecedented understanding of human language and context.',
+			author: 'Tech Reporter',
+			urlToImage: 'https://picsum.photos/800/450?random=1',
+			url: 'https://example.com/ai-breakthrough'
+		},
+		{
+			title: 'Quantum Computing Milestone Achieved',
+			description: 'Scientists have successfully created a stable quantum computer with 1000+ qubits, marking a significant advancement in computing technology.',
+			author: 'Science Daily',
+			urlToImage: 'https://picsum.photos/800/450?random=2',
+			url: 'https://example.com/quantum-computing'
+		},
+		{
+			title: 'SpaceX Launches Revolutionary Satellite Constellation',
+			description: 'Elon Musk\'s company successfully deployed the latest batch of Starlink satellites, expanding global internet coverage.',
+			author: 'Space News',
+			urlToImage: 'https://picsum.photos/800/450?random=3',
+			url: 'https://example.com/spacex-launch'
 		}
-		
-		const json = await res.json();
-		return json;
-	} catch (error) {
-		console.warn(`Proxy ${proxyIndex + 1} failed:`, error.message);
-		return tryFetchWithProxy(url, proxyIndex + 1);
-	}
-}
+	],
+	finance: [
+		{
+			title: 'Global Markets Reach New Heights',
+			description: 'Major stock indices worldwide have achieved record-breaking levels, driven by strong corporate earnings and economic recovery.',
+			author: 'Financial Times',
+			urlToImage: 'https://picsum.photos/800/450?random=4',
+			url: 'https://example.com/markets-high'
+		},
+		{
+			title: 'Cryptocurrency Adoption Surges',
+			description: 'Digital currencies are gaining mainstream acceptance as major corporations begin accepting Bitcoin and other cryptocurrencies.',
+			author: 'Crypto News',
+			urlToImage: 'https://picsum.photos/800/450?random=5',
+			url: 'https://example.com/crypto-adoption'
+		},
+		{
+			title: 'Green Energy Investments Soar',
+			description: 'Renewable energy companies are attracting unprecedented levels of investment as the world transitions to sustainable power sources.',
+			author: 'Green Finance',
+			urlToImage: 'https://picsum.photos/800/450?random=6',
+			url: 'https://example.com/green-energy'
+		}
+	],
+	arts: [
+		{
+			title: 'Revolutionary Art Exhibition Opens',
+			description: 'A groundbreaking digital art exhibition featuring AI-generated masterpieces has opened to critical acclaim in major cities worldwide.',
+			author: 'Art Critic',
+			urlToImage: 'https://picsum.photos/800/450?random=7',
+			url: 'https://example.com/art-exhibition'
+		},
+		{
+			title: 'Cultural Festival Celebrates Diversity',
+			description: 'The annual international cultural festival brings together artists, musicians, and performers from over 50 countries.',
+			author: 'Culture Weekly',
+			urlToImage: 'https://picsum.photos/800/450?random=8',
+			url: 'https://example.com/cultural-festival'
+		},
+		{
+			title: 'Virtual Reality Transforms Entertainment',
+			description: 'VR technology is revolutionizing how we experience movies, games, and live performances, creating immersive new forms of entertainment.',
+			author: 'Entertainment News',
+			urlToImage: 'https://picsum.photos/800/450?random=9',
+			url: 'https://example.com/vr-entertainment'
+		}
+	]
+};
 
 export async function fetchTechNews(tabKey = 'tech') {
 	const category = TAB_TO_CATEGORY[tabKey] || 'technology';
@@ -49,7 +86,8 @@ export async function fetchTechNews(tabKey = 'tech') {
 	// Check if API key is loaded
 	if (!API_KEY) {
 		console.error('API key not found in environment variables');
-		throw new Error('API key not configured');
+		console.log('Using sample news data');
+		return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 	}
 	
 	// Use CORS proxy for deployed sites, direct API for local development
@@ -92,48 +130,42 @@ export async function fetchTechNews(tabKey = 'tech') {
 			
 			json = await res.json();
 		} else {
-			// Try local proxy server first, then fallback to CORS proxies
+			// For deployed sites, try a simple CORS proxy first
 			try {
-				console.log('Trying local proxy server...');
-				const proxyUrl = `${window.location.origin}/api/news/${category}`;
-				const res = await fetch(proxyUrl);
+				const apiUrl = `${BASE_URL}/top-headlines?category=${category}&language=en&pageSize=20`;
+				const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+				
+				console.log('Trying CORS proxy:', proxyUrl);
+				
+				const res = await fetch(proxyUrl, {
+					headers: {
+						'X-Api-Key': API_KEY,
+					},
+				});
 				
 				if (res.ok) {
 					json = await res.json();
-					console.log('Local proxy server successful');
+					console.log('CORS proxy successful');
 				} else {
-					throw new Error('Local proxy failed');
+					throw new Error('CORS proxy failed');
 				}
 			} catch (proxyError) {
-				console.warn('Local proxy failed, trying CORS proxies:', proxyError.message);
-				const apiUrl = `${BASE_URL}/top-headlines?category=${category}&language=en&pageSize=20`;
-				json = await tryFetchWithProxy(apiUrl);
+				console.warn('CORS proxy failed, using sample data:', proxyError.message);
+				return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 			}
 		}
 		
 		console.log(`Received ${json.articles?.length || 0} articles for ${tabKey}`);
-		console.log('API Response structure:', Object.keys(json));
 		
 		if (!json.articles || json.articles.length === 0) {
-			console.warn('No articles returned from API');
-			// Return some fallback articles if API fails
-			return [
-				{
-					title: 'Sample Tech News',
-					description: 'This is a sample article when the API is not available.',
-					author: 'V_Mach',
-					urlToImage: 'https://picsum.photos/800/450',
-					url: '#'
-				}
-			];
+			console.warn('No articles returned from API, using sample data');
+			return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 		}
 		
 		return json.articles;
 	} catch (error) {
 		console.error('Fetch error:', error);
-		if (error.name === 'TypeError' && error.message.includes('fetch')) {
-			throw new Error('Network error. Please check your internet connection.');
-		}
-		throw error;
+		console.log('Falling back to sample news data');
+		return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 	}
 } 
