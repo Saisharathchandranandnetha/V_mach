@@ -103,10 +103,14 @@ export default function App() {
 		async function load() {
 			try {
 				setLoading(true);
+				setError('');
 				const data = await fetchTechNews(activeTab);
 				if (!cancelled) setArticles(data);
 			} catch (e) {
-				if (!cancelled) setError('Could not load news');
+				if (!cancelled) {
+					console.error('News fetch error:', e);
+					setError(e.message || 'Could not load news');
+				}
 			} finally {
 				if (!cancelled) setLoading(false);
 			}
@@ -130,8 +134,22 @@ export default function App() {
 			<TopTabs active={activeTab} onChange={setActiveTab} />
 			<main className="px-4 md:px-6 lg:px-10 pb-24 space-y-6">
 				<section className="grid grid-cols-1 gap-5 max-w-3xl mx-auto">
-					{loading && <p className="text-zinc-400">Loading...</p>}
-					{error && <p className="text-red-400">{error}</p>}
+					{loading && (
+						<div className="text-center py-8">
+							<div className="text-zinc-400 text-lg">Loading {activeTab === 'tech' ? 'Tech & Science' : activeTab === 'finance' ? 'Finance' : 'Arts & Culture'} news...</div>
+						</div>
+					)}
+					{error && (
+						<div className="text-center py-8">
+							<div className="text-red-400 text-lg mb-2">{error}</div>
+							<div className="text-zinc-500 text-sm">Try switching tabs or check your connection</div>
+						</div>
+					)}
+					{!loading && !error && filtered.length === 0 && (
+						<div className="text-center py-8">
+							<div className="text-zinc-400 text-lg">No articles found</div>
+						</div>
+					)}
 					{filtered.map((a, idx) => (
 						<NewsCard key={idx} article={a} />
 					))}
