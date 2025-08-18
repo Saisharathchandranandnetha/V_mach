@@ -62,7 +62,7 @@ function NewsCard({ article }) {
 			<div className="rounded-2xl overflow-hidden bg-white/5 shadow-soft transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl">
 				<div className="aspect-[16/10] w-full overflow-hidden">
 					{imageUrl ? (
-						<img src={imageUrl} alt={headline} className="h-full w-full object-cover" loading="lazy" />
+						<img src={imageUrl} alt={headline} className="h-full w-full object-cover" loading="lazy" decoding="async" />
 					) : (
 						<div className="h-full w-full bg-neutral-800 flex items-center justify-center text-zinc-500">No image</div>
 					)}

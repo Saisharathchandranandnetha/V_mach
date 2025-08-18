@@ -1,4 +1,10 @@
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
+// Backup keys to try sequentially if one fails (e.g., rate-limited)
+const BACKUP_API_KEYS = [
+    API_KEY,
+    // User-provided fallback key
+    '7c36a5e092e1434cae09893fb0710d50',
+].filter(Boolean);
 const BASE_URL = 'https://newsapi.org/v2';
 
 const TAB_TO_CATEGORY = {
@@ -83,49 +89,45 @@ const SAMPLE_NEWS = {
 export async function fetchTechNews(tabKey = 'tech', options = {}) {
 	const { signal } = options || {};
 	const category = TAB_TO_CATEGORY[tabKey] || 'technology';
-	
-	// Check if API key is loaded
-	if (!API_KEY) {
-		console.error('API key not found in environment variables');
-		return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
-	}
-	
-	// Build URL with apiKey as query param (works with proxies too)
-	const apiUrl = `${BASE_URL}/top-headlines?category=${category}&language=en&pageSize=20&apiKey=${API_KEY}`;
-	const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-	try {
-		let res;
-		if (isLocalhost) {
-			res = await fetch(apiUrl, { signal, cache: 'no-store' });
-		} else {
-			const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-			res = await fetch(proxyUrl, { signal, cache: 'no-store' });
-		}
-		
-		if (!res.ok) {
-			const errorData = await res.json().catch(() => ({}));
-			if (res.status === 429) {
-				throw new Error('Rate limit exceeded. Please try again later.');
-			} else if (res.status === 401) {
-				throw new Error('Invalid API key. Please check your configuration.');
-			} else if (res.status === 403) {
-				throw new Error('Access forbidden. Your API key may not have permission for this endpoint.');
+	// Try each key until one succeeds
+	for (const key of BACKUP_API_KEYS) {
+		// Build URL with apiKey as query param (works with proxies too)
+		const apiUrl = `${BASE_URL}/top-headlines?category=${category}&language=en&pageSize=20&apiKey=${key}`;
+		const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+		try {
+			let res;
+			if (isLocalhost) {
+				res = await fetch(apiUrl, { signal, cache: 'no-store' });
 			} else {
+				const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+				res = await fetch(proxyUrl, { signal, cache: 'no-store' });
+			}
+
+			if (!res.ok) {
+				// For rate limit or auth issues, try the next key
+				if (res.status === 429 || res.status === 401 || res.status === 403) {
+					continue;
+				}
+				const errorData = await res.json().catch(() => ({}));
 				throw new Error(errorData.message || `HTTP ${res.status}: Failed to fetch news`);
 			}
+
+			const json = await res.json();
+			if (!json.articles || json.articles.length === 0) {
+				// Try next key if no content returned
+				continue;
+			}
+			return json.articles;
+		} catch (error) {
+			if (error?.name === 'AbortError') {
+				return [];
+			}
+			// Try next key
+			continue;
 		}
-		
-		const json = await res.json();
-		if (!json.articles || json.articles.length === 0) {
-			return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
-		}
-		return json.articles;
-	} catch (error) {
-		if (error?.name === 'AbortError') {
-			return [];
-		}
-		console.error('Fetch error:', error);
-		return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 	}
+
+	// If all keys failed, fall back to sample data
+	return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 }
