@@ -80,92 +80,52 @@ const SAMPLE_NEWS = {
 	]
 };
 
-export async function fetchTechNews(tabKey = 'tech') {
+export async function fetchTechNews(tabKey = 'tech', options = {}) {
+	const { signal } = options || {};
 	const category = TAB_TO_CATEGORY[tabKey] || 'technology';
 	
 	// Check if API key is loaded
 	if (!API_KEY) {
 		console.error('API key not found in environment variables');
-		console.log('Using sample news data');
 		return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 	}
 	
-	// Use CORS proxy for deployed sites, direct API for local development
+	// Build URL with apiKey as query param (works with proxies too)
+	const apiUrl = `${BASE_URL}/top-headlines?category=${category}&language=en&pageSize=20&apiKey=${API_KEY}`;
 	const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-	
-	console.log(`Fetching news for ${tabKey} (category: ${category})`);
-	console.log('API Key present:', !!API_KEY);
-	console.log('Environment:', isLocalhost ? 'local' : 'deployed');
-	
+
 	try {
-		let json;
-		
+		let res;
 		if (isLocalhost) {
-			// Direct API call for local development
-			const apiUrl = `${BASE_URL}/top-headlines?category=${category}&language=en&pageSize=20`;
-			console.log('Using direct API:', apiUrl);
-			
-			const res = await fetch(apiUrl, {
-				headers: {
-					'X-Api-Key': API_KEY,
-				},
-			});
-			
-			console.log('Response status:', res.status);
-			
-			if (!res.ok) {
-				const errorData = await res.json().catch(() => ({}));
-				console.error('API Error details:', errorData);
-				
-				if (res.status === 429) {
-					throw new Error('Rate limit exceeded. Please try again later.');
-				} else if (res.status === 401) {
-					throw new Error('Invalid API key. Please check your configuration.');
-				} else if (res.status === 403) {
-					throw new Error('Access forbidden. Your API key may not have permission for this endpoint.');
-				} else {
-					throw new Error(errorData.message || `HTTP ${res.status}: Failed to fetch news`);
-				}
-			}
-			
-			json = await res.json();
+			res = await fetch(apiUrl, { signal, cache: 'no-store' });
 		} else {
-			// For deployed sites, try a simple CORS proxy first
-			try {
-				const apiUrl = `${BASE_URL}/top-headlines?category=${category}&language=en&pageSize=20`;
-				const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-				
-				console.log('Trying CORS proxy:', proxyUrl);
-				
-				const res = await fetch(proxyUrl, {
-					headers: {
-						'X-Api-Key': API_KEY,
-					},
-				});
-				
-				if (res.ok) {
-					json = await res.json();
-					console.log('CORS proxy successful');
-				} else {
-					throw new Error('CORS proxy failed');
-				}
-			} catch (proxyError) {
-				console.warn('CORS proxy failed, using sample data:', proxyError.message);
-				return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
+			const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+			res = await fetch(proxyUrl, { signal, cache: 'no-store' });
+		}
+		
+		if (!res.ok) {
+			const errorData = await res.json().catch(() => ({}));
+			if (res.status === 429) {
+				throw new Error('Rate limit exceeded. Please try again later.');
+			} else if (res.status === 401) {
+				throw new Error('Invalid API key. Please check your configuration.');
+			} else if (res.status === 403) {
+				throw new Error('Access forbidden. Your API key may not have permission for this endpoint.');
+			} else {
+				throw new Error(errorData.message || `HTTP ${res.status}: Failed to fetch news`);
 			}
 		}
 		
-		console.log(`Received ${json.articles?.length || 0} articles for ${tabKey}`);
-		
+		const json = await res.json();
 		if (!json.articles || json.articles.length === 0) {
-			console.warn('No articles returned from API, using sample data');
 			return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 		}
-		
 		return json.articles;
 	} catch (error) {
+		if (error?.name === 'AbortError') {
+			return [];
+		}
 		console.error('Fetch error:', error);
-		console.log('Falling back to sample news data');
 		return SAMPLE_NEWS[tabKey] || SAMPLE_NEWS.tech;
 	}
-} 
+}
