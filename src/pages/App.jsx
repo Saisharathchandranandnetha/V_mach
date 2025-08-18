@@ -17,15 +17,13 @@ function TopTabs({ active, onChange }) {
 				<div className="mb-3 flex items-center justify-between">
 					<h1 className="text-4xl font-semibold tracking-tight">V_Mach <span className="ml-2 text-zinc-500 text-sm font-normal">by  Mach__Infinity</span></h1>
 					<div className="shrink-0">
-						<div className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px] rounded-full inline-block">
-							<img
-								src="/avatar.jpg"
-								onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://api.dicebear.com/7.x/initials/svg?seed=MI'; }}
-								alt="profile avatar"
-								className="h-9 w-9 rounded-full object-cover border-2 border-neutral-900"
-								loading="lazy"
-							/>
-						</div>
+						<img
+							src="/avatar.jpg"
+							onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://api.dicebear.com/7.x/initials/svg?seed=MI'; }}
+							alt="profile avatar"
+							className="h-9 w-9 rounded-full object-cover"
+							loading="lazy"
+						/>
 					</div>
 				</div>
 				<div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
@@ -135,7 +133,7 @@ function WelcomeModal({ isOpen, onClose }) {
 				{/* Content */}
 				<div className="pr-8">
 					<h2 className="text-3xl font-bold text-white mb-6 tracking-tight">
-						Welcome to V_Mach Daily Tech News
+						Welcome to V_Mach 
 					</h2>
 					
 					<div className="space-y-4 text-zinc-300 leading-relaxed">
