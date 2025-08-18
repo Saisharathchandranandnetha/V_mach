@@ -14,7 +14,20 @@ function TopTabs({ active, onChange }) {
 	return (
 		<div className="sticky top-0 z-20 backdrop-blur bg-neutral-900/70">
 			<div className="px-5 pt-3 pb-2">
-				<h1 className="text-4xl font-semibold tracking-tight mb-3">V_Mach <span className="ml-2 text-zinc-500 text-sm font-normal">by  Mach__Infinity</span></h1>
+				<div className="mb-3 flex items-center justify-between">
+					<h1 className="text-4xl font-semibold tracking-tight">V_Mach <span className="ml-2 text-zinc-500 text-sm font-normal">by  Mach__Infinity</span></h1>
+					<div className="shrink-0">
+						<div className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px] rounded-full inline-block">
+							<img
+								src="/avatar.jpg"
+								onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://api.dicebear.com/7.x/initials/svg?seed=MI'; }}
+								alt="profile avatar"
+								className="h-9 w-9 rounded-full object-cover border-2 border-neutral-900"
+								loading="lazy"
+							/>
+						</div>
+					</div>
+				</div>
 				<div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
 					{tabs.map(t => (
 						<button
@@ -122,7 +135,7 @@ function WelcomeModal({ isOpen, onClose }) {
 				{/* Content */}
 				<div className="pr-8">
 					<h2 className="text-3xl font-bold text-white mb-6 tracking-tight">
-						Welcome to Mach__Infinity Daily Tech News
+						Welcome to V_Mach Daily Tech News
 					</h2>
 					
 					<div className="space-y-4 text-zinc-300 leading-relaxed">
