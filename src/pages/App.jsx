@@ -314,7 +314,18 @@ export default function App() {
 							className="ml-3 hidden sm:inline bg-transparent outline-none placeholder:text-white/50"
 						/>
 					</button>
-					<button className="p-3 text-white/80 hover:text-white transition-colors"><Home size={22} /></button>
+					<button 
+						className={`p-3 transition-colors ${location.pathname === '/' ? 'text-cyan-400' : 'text-white/80 hover:text-white'}`}
+						onClick={() => navigate('/')}
+					>
+						<Home size={22} />
+					</button>
+					<button 
+						className={`p-3 transition-colors ${location.pathname === '/career' ? 'text-cyan-400' : 'text-white/80 hover:text-white'}`}
+						onClick={() => navigate('/career')}
+					>
+						<Target size={22} />
+					</button>
 					<button className="p-3 text-white/80 hover:text-white transition-colors"><BadgeHelp size={22} /></button>
 					<button className="p-3 text-white/80 hover:text-white transition-colors"><Radio size={22} /></button>
 				</div>
