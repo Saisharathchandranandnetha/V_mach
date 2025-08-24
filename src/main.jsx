@@ -8,6 +8,7 @@ import CareerPage from './pages/CareerPage.jsx';
 const router = createBrowserRouter([
 	{ path: '/', element: <App /> },
 	{ path: '/career', element: <CareerPage /> },
+	{ path: '*', element: <App /> }, // Fallback route
 ]);
 
 createRoot(document.getElementById('root')).render(

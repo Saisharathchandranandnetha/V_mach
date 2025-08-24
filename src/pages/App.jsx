@@ -322,7 +322,10 @@ export default function App() {
 					</button>
 					<button 
 						className={`p-3 transition-colors ${location.pathname === '/career' ? 'text-cyan-400' : 'text-white/80 hover:text-white'}`}
-						onClick={() => navigate('/career')}
+						onClick={() => {
+							console.log('Career button clicked, navigating to /career'); // Debug log
+							navigate('/career');
+						}}
 					>
 						<Target size={22} />
 					</button>

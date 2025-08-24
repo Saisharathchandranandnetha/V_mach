@@ -112,6 +112,7 @@ function CareerCard({ item }) {
 }
 
 export default function CareerPage() {
+	console.log('CareerPage component rendered'); // Debug log
 	const [searchQuery, setSearchQuery] = useState('');
 	const [activeCategory, setActiveCategory] = useState('all');
 
@@ -144,6 +145,10 @@ export default function CareerPage() {
 
 	return (
 		<div className="min-h-screen bg-neutral-900 text-white">
+			{/* Debug info */}
+			<div className="fixed top-4 right-4 bg-red-500 text-white px-2 py-1 rounded text-xs z-50">
+				CareerPage Active - Path: {window.location.pathname}
+			</div>
 			{/* Header */}
 			<div className="sticky top-0 z-20 backdrop-blur bg-neutral-900/70 border-b border-white/10">
 				<div className="px-5 pt-3 pb-4">
