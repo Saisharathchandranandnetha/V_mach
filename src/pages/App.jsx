@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bookmark, BookmarkCheck, Headphones, Search, Home, BadgeHelp, Radio, X, Target, Share2, Heart } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Headphones, Search, Home, X, Target, Share2, Heart } from 'lucide-react';
 import { useNewsStore } from '../store/newsStore.js';
 import { useBookmarksStore } from '../store/bookmarksStore.js';
 import { fetchTechNews } from '../services/newsApi.js';
@@ -329,8 +329,6 @@ export default function App() {
 					>
 						<Target size={22} />
 					</button>
-					<button className="p-3 text-white/80 hover:text-white transition-colors"><BadgeHelp size={22} /></button>
-					<button className="p-3 text-white/80 hover:text-white transition-colors"><Radio size={22} /></button>
 				</div>
 			</nav>
 		</div>
