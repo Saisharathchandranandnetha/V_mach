@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bookmark, BookmarkCheck, Headphones, Search, Home, BadgeHelp, Radio, X } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Headphones, Search, Home, BadgeHelp, Radio, X, Target, Share2, Heart } from 'lucide-react';
 import { useNewsStore } from '../store/newsStore.js';
 import { useBookmarksStore } from '../store/bookmarksStore.js';
 import { fetchTechNews } from '../services/newsApi.js';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const tabs = [
 	{ key: 'tech', label: 'Tech & Science' },
@@ -31,10 +32,10 @@ function TopTabs({ active, onChange }) {
 						<button
 							key={t.key}
 							onClick={() => onChange(t.key)}
-							className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
+							className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
 								active === t.key
-									? 'bg-cyan-700/40 text-cyan-300'
-									: 'bg-white/5 text-zinc-300 hover:bg-white/10'
+									? 'bg-cyan-600/60 text-cyan-200 shadow-lg shadow-cyan-600/20 border border-cyan-500/30'
+									: 'bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white'
 							}`}
 						>
 							{t.label}
@@ -55,6 +56,26 @@ function NewsCard({ article }) {
 	const { toggleBookmark, isBookmarked } = useBookmarksStore();
 	const bookmarked = isBookmarked(article.url);
 
+	const handleShare = (e) => {
+		e.stopPropagation();
+		if (navigator.share) {
+			navigator.share({
+				title: headline,
+				text: description,
+				url: article.url
+			});
+		} else {
+			navigator.clipboard.writeText(article.url);
+			// You could add a toast notification here
+		}
+	};
+
+	const handleLike = (e) => {
+		e.stopPropagation();
+		// You could implement like functionality here
+		// For now, just prevent the click from bubbling
+	};
+
 	return (
 		<article onClick={open} className="select-none cursor-pointer">
 			<div className="rounded-2xl overflow-hidden bg-white/5 shadow-soft transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl">
@@ -65,14 +86,17 @@ function NewsCard({ article }) {
 						<div className="h-full w-full bg-neutral-800 flex items-center justify-center text-zinc-500">No image</div>
 					)}
 				</div>
-				<div className="px-5 pt-4 pb-5">
+				
+				{/* Added white space between image and content */}
+				<div className="px-5 pt-6 pb-5">
 					<h2 className="text-white text-3xl font-extrabold leading-tight tracking-tight drop-shadow-[0_1px_0_rgba(0,0,0,0.8)]">
 						{headline}
 					</h2>
-					<p className="text-zinc-300/80 mt-3 text-lg leading-relaxed line-clamp-2">
+					<p className="text-zinc-300/80 mt-4 text-lg leading-relaxed line-clamp-2">
 						{description}
 					</p>
-					<div className="mt-5 flex items-center justify-between">
+					
+					<div className="mt-6 flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							<img src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(author)}`} alt="author" className="h-7 w-7 rounded-full" />
 							<span className="text-zinc-300 text-base">
@@ -90,6 +114,39 @@ function NewsCard({ article }) {
 							<button className="p-2 rounded-full bg-white/10 hover:bg-white/20" onClick={(e) => { e.stopPropagation(); speakArticle(headline + '. ' + description); }} aria-label="listen">
 								<Headphones size={20} />
 							</button>
+						</div>
+					</div>
+					
+					{/* New toolbar with Save, Share, Like buttons */}
+					<div className="mt-4 pt-4 border-t border-white/10">
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-4">
+								<button
+									className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors ${
+										bookmarked 
+											? 'bg-cyan-600/20 text-cyan-300' 
+											: 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
+									}`}
+									onClick={(e) => { e.stopPropagation(); toggleBookmark(article); }}
+								>
+									{bookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+									Save
+								</button>
+								<button
+									className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
+									onClick={handleShare}
+								>
+									<Share2 size={16} />
+									Share
+								</button>
+								<button
+									className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
+									onClick={handleLike}
+								>
+									<Heart size={16} />
+									Like
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -177,6 +234,8 @@ export default function App() {
 	const [query, setQuery] = useState('');
 	const [showWelcome, setShowWelcome] = useState(true);
     const [cache, setCache] = useState({});
+	const navigate = useNavigate();
+	const location = useLocation();
 
 	useEffect(() => {
 		const controller = new AbortController();
