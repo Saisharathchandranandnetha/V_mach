@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Search, ArrowRight, MessageCircle, Briefcase, TrendingUp, Users, BookOpen } from 'lucide-react';
+import axios from 'axios';
 
 const careerNews = [
 	{
@@ -115,6 +116,10 @@ export default function CareerPage() {
 	console.log('CareerPage component rendered'); // Debug log
 	const [searchQuery, setSearchQuery] = useState('');
 	const [activeCategory, setActiveCategory] = useState('all');
+	const [input, setInput] = useState('');
+	const [chatLog, setChatLog] = useState([]);
+	// New state to control chat box visibility
+	const [showChat, setShowChat] = useState(false);
 
 	const filteredItems = useMemo(() => {
 		let filtered = careerNews;
@@ -143,6 +148,22 @@ export default function CareerPage() {
 		return filtered;
 	}, [searchQuery, activeCategory]);
 
+	// Handles sending the user message to the API endpoint
+	const handleSend = async () => {
+		if (!input) return;
+		setChatLog([...chatLog, { from: 'user', text: input }]);
+		try {
+			const res = await axios.post('http://localhost:4000/api/chat', {
+				userId: '1', // Assume user 1 for demonstration
+				message: input
+			});
+			setChatLog(prev => [...prev, { from: 'bot', text: res.data.reply }]);
+		} catch (error) {
+			setChatLog(prev => [...prev, { from: 'bot', text: 'Error processing request' }]);
+		}
+		setInput('');
+	};
+
 	return (
 		<div className="min-h-screen bg-neutral-900 text-white">
 			{/* Debug info */}
@@ -155,7 +176,11 @@ export default function CareerPage() {
 					<div className="mb-4 flex items-center justify-between">
 						<h1 className="text-3xl font-bold tracking-tight">Career Guidance</h1>
 						<div className="flex gap-2">
-							<button className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2">
+							{/* Updated Ask Mentor button */}
+							<button
+								onClick={() => setShowChat(true)}
+								className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2"
+							>
 								<MessageCircle size={16} />
 								Ask Mentor
 							</button>
@@ -215,6 +240,46 @@ export default function CareerPage() {
 						{filteredItems.map(item => (
 							<CareerCard key={item.id} item={item} />
 						))}
+					</div>
+				)}
+				
+				{/* Conditionally render Chat Interface */}
+				{showChat && (
+					<div className="mt-12 max-w-3xl mx-auto bg-white/5 p-6 rounded-2xl border border-white/10">
+						<h2 className="text-2xl font-bold mb-4">Career Guidance Chat</h2>
+						<p className="text-zinc-400 text-sm mb-4">
+							This module implements the career guidance flow: Onboarding → Profile storage → Knowledge ingestion → Chat interaction → LLM orchestration for recommendations.
+						</p>
+						<div className="border-t border-white/10 pt-4">
+							<div className="h-60 overflow-y-auto mb-4">
+								{chatLog.map((msg, index) => (
+									<div key={index} className={`mb-2 ${msg.from === 'user' ? 'text-right' : 'text-left'}`}>
+										<span className={`block text-sm ${msg.from === 'user' ? 'text-cyan-400' : 'text-white'}`}>
+											{msg.from === 'user' ? 'You' : 'Bot'}:
+										</span>
+										<span className={`block text-lg ${msg.from === 'user' ? 'text-white' : 'text-zinc-300'}`}>
+											{msg.text}
+										</span>
+									</div>
+								))}
+							</div>
+							
+							<div className="flex">
+								<input
+									type="text"
+									value={input}
+									onChange={e => setInput(e.target.value)}
+									placeholder="Ask your career-related question"
+									className="flex-1 bg-white/5 border border-white/10 rounded-full pl-4 pr-10 py-3 text-white placeholder:text-zinc-400 focus:outline-none focus:border-cyan-500/50 transition-colors mr-2"
+								/>
+								<button
+									onClick={handleSend}
+									className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2"
+								>
+									Send
+								</button>
+							</div>
+						</div>
 					</div>
 				)}
 			</main>

@@ -6,4 +6,20 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_NEWS_API_KEY
-        sync: false 
+        sync: false
+      # Career guidance / chat flow configuration
+      - key: CAREER_CHAT_FLOW_ENABLED
+        value: "true"
+        sync: false
+      - key: VITE_OPENAI_API_KEY
+        sync: false
+      - key: VITE_PINECONE_API_KEY
+        sync: false
+      - key: VITE_PINECONE_ENV
+        sync: false
+      - key: VITE_NEO4J_URI
+        sync: false
+      - key: VITE_NEO4J_USER
+        sync: false
+      - key: VITE_NEO4J_PASSWORD
+        sync: false

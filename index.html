@@ -1,3 +1,41 @@
+<!--
+Run locally:
+1) Open a terminal and go to the project root:
+   cd "c:\Users\gunde\OneDrive\Documents\Vmach"
+
+2) If you already have package.json:
+   npm install
+   npm run dev
+   (or: npx vite)
+
+3) If no package.json:
+   npm init -y
+   npm install react react-dom
+   npm install -D vite
+   (add "dev": "vite" to package.json scripts)
+   npm run dev
+
+Check Node: node -v (use Node >=16)
+
+Career guidance chat flow (summary / mapping to app components)
+1) User Onboarding -> Profile Builder (frontend route: /onboard, component: ProfileBuilder)
+2) Profile stored in User DB -> backend endpoint: POST /api/users/:id/profile
+3) Knowledge Ingestor -> background job/service: /ingest (ingest jobs/courses/trends into vector and graph DBs)
+4) Vector DB (Chroma/Pinecone) & Graph DB (Neo4j) -> store embeddings and relationships
+5) User Query -> frontend chat UI sends query to /api/chat
+6) RAG Retrieval -> backend: retrieval service queries vector DB and graph DB, returns documents + subgraph
+7) Context Enrichment -> backend middleware that merges user profile, retrieval results, and graph context
+8) LLM Orchestrator -> backend: /api/llm orchestrates calls to GPT-4 with enriched context
+9) Personalized Recommendation -> LLM output produces roadmap/skills/jobs
+10) Display -> OmniPath UI chat component renders recommendations and visual roadmap
+
+Suggested implementation notes:
+- Endpoints: POST /api/ingest, POST /api/users/:id/profile, POST /api/chat
+- Env vars (see render.yaml): OPENAI_API_KEY, PINECONE_API_KEY, NEO4J_URI, etc.
+- Keep retrieval and enrichment server-side to avoid leaking keys and large model context.
+- Start by building minimal MWE: ProfileBuilder -> simple /api/chat that returns canned example, then progressively integrate ingestion, vector DB, and LLM.
+
+-->
 <!doctype html>
 <html lang="en" class="h-full">
   <head>
@@ -9,4 +47,4 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
-</html> 
+</html>
