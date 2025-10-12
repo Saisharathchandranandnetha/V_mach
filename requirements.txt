@@ -1,0 +1,37 @@
+# V_Mach News Aggregation System Dependencies
+
+# HTTP requests for NewsAPI
+requests>=2.31.0
+
+# Web scraping with Playwright
+playwright>=1.40.0
+
+# Additional utilities that might be useful
+python-dateutil>=2.8.2
+
+# For better logging and debugging
+colorlog>=6.7.0
+
+# For URL parsing and validation
+urllib3>=2.0.0
+
+# For async operations (included with Python)
+# asyncio is part of Python standard library
+
+# For type hints (included with Python 3.5+)
+# typing is part of Python standard library
+
+# For regular expressions (included with Python)
+# re is part of Python standard library
+
+# For hashing (included with Python)
+# hashlib is part of Python standard library
+
+# For datetime operations (included with Python)
+# datetime is part of Python standard library
+
+# For logging (included with Python)
+# logging is part of Python standard library
+
+# For database operations (included with Python)
+# sqlite3 is part of Python standard library
